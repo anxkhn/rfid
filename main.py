@@ -2,7 +2,6 @@ import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 from picamera import PiCamera
 from time import sleep
-from qrcode import QRCode
 import sengo
 from cs50 import SQL
 
