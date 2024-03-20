@@ -2,7 +2,8 @@ import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 from picamera import PiCamera
 from time import sleep
-import zbarlight
+from qrcode import QRCode
+import sengo
 from cs50 import SQL
 
 # Initialize SQLite database
@@ -38,15 +39,12 @@ try:
             camera.stop_preview()
 
             # Decode QR code
-            with open('qr_code.jpg', 'rb') as image_file:
-                image = image_file.read()
-                codes = zbarlight.scan_codes(['qrcode'], image)
-                if codes:
-                    qr_code_data = codes[0].decode('utf-8')
-                    mark_attendance(professor_id, qr_code_data)
-                    print("Attendance marked for student ID:", qr_code_data)
-                else:
-                    print("No QR code detected.")
+            qr_code_data = sengo.read('qr_code.jpg')
+            if qr_code_data:
+                mark_attendance(professor_id, qr_code_data)
+                print("Attendance marked for student ID:", qr_code_data)
+            else:
+                print("No QR code detected.")
             sleep(1)  # Wait between scans
 
         # End of lecture
