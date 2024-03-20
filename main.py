@@ -1,37 +1,15 @@
-import subprocess
-import ctypes
-import os
+import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 from time import sleep
 from qrcode import QRCode
-from cs50 import SQL
-import RPi.GPIO as GPIO
+from pyzbar.pyzbar import decode
+import subprocess
 
 # Initialize SQLite database
 db = SQL("sqlite:///attendance.db")
 
 # Create table if it doesn't exist
 db.execute("CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, professor_id TEXT NOT NULL, student_id TEXT NOT NULL, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-
-# Load zxing-cpp library
-zxing = ctypes.CDLL("path_to_zxing_cpp_library.so")  # Replace "path_to_zxing_cpp_library.so" with the actual path
-
-# Function to decode QR code using zxing-cpp
-def decode_qr_code(image_path):
-    # Define the signature of the function in C++
-    zxing.decode.argtypes = [ctypes.c_char_p]
-    zxing.decode.restype = ctypes.c_char_p
-    
-    # Convert image path to bytes
-    image_bytes = image_path.encode('utf-8')
-    
-    # Call the decode function from zxing-cpp
-    result = zxing.decode(image_bytes)
-    
-    # Decode the result
-    decoded_data = result.decode('utf-8') if result else None
-    
-    return decoded_data
 
 # Function to mark attendance
 def mark_attendance(professor_id, student_id):
@@ -54,13 +32,14 @@ try:
         # Capture QR codes during the lecture using libcamera-still
         for _ in range(5):  # Assuming 5 students
             # Capture image using libcamera-still
+            print(_)
             subprocess.run(["libcamera-still", "-o", "qr_code.jpg"])
-
-            # Decode QR code
-            qr_code_data = decode_qr_code("qr_code.jpg")
+            sleep(5)
+            # Decode QR code using pyzbar
+            qr_code_data = decode(Image.open("qr_code.jpg"))
             if qr_code_data:
-                mark_attendance(professor_id, qr_code_data)
-                print("Attendance marked for student ID:", qr_code_data)
+                mark_attendance(professor_id, qr_code_data[0].data.decode("utf-8"))
+                print("Attendance marked for student ID:", qr_code_data[0].data.decode("utf-8"))
             else:
                 print("No QR code detected.")
             sleep(1)  # Wait between scans
