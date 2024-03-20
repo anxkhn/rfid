@@ -1,13 +1,15 @@
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 from time import sleep
-from qrcode import QRCode
 import sengo
 from cs50 import SQL
 import subprocess
 
 # Initialize SQLite database
 db = SQL("sqlite:///attendance.db")
+
+# Create table if it doesn't exist
+db.execute("CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, professor_id TEXT NOT NULL, student_id TEXT NOT NULL, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
 
 # Function to mark attendance
 def mark_attendance(professor_id, student_id):
