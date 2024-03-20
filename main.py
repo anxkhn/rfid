@@ -4,6 +4,7 @@ from time import sleep
 from qrcode import QRCode
 from pyzbar.pyzbar import decode
 import subprocess
+from cs50 import SQL
 
 # Initialize SQLite database
 db = SQL("sqlite:///attendance.db")
