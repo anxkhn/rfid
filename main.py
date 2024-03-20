@@ -1,9 +1,10 @@
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
-from picamera import PiCamera
 from time import sleep
+from qrcode import QRCode
 import sengo
 from cs50 import SQL
+import subprocess
 
 # Initialize SQLite database
 db = SQL("sqlite:///attendance.db")
@@ -26,16 +27,10 @@ try:
         print("Lecture has started. Students can now scan their QR codes.")
         sleep(5)  # Let professor move away from the RFID reader
 
-        # Initialize Pi Camera
-        camera = PiCamera()
-
-        # Capture QR codes during the lecture
+        # Capture QR codes during the lecture using libcamera-still
         for _ in range(5):  # Assuming 5 students
-            # Capture image
-            camera.start_preview()
-            sleep(2)  # Give time for camera to adjust
-            camera.capture('qr_code.jpg')
-            camera.stop_preview()
+            # Capture image using libcamera-still
+            subprocess.run(["libcamera-still", "-o", "qr_code.jpg"])
 
             # Decode QR code
             qr_code_data = sengo.read('qr_code.jpg')
